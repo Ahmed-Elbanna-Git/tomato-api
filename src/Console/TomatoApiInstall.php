@@ -37,7 +37,7 @@ class TomatoApiInstall extends Command
     public function handle()
     {
         $this->info('Publish Vendor Assets');
-        $this->call('vendor:publish', ['--provider' => 'Queents\TomatoApi\TomatoApiServiceProvider']);
+        $this->call('vendor:publish', ['--provider' => 'TomatoPHP\TomatoApi\TomatoApiServiceProvider']);
         $this->artisanCommand(["optimize:clear"]);
         $this->info('Tomato Api installed successfully.');
     }

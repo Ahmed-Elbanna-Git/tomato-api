@@ -26,6 +26,7 @@ class Update{{ model }} extends FormRequest
     public function rules()
     {
         $rules = [
+        'id'=>'required',
             {{ cols }}
         ];
         return $rules;

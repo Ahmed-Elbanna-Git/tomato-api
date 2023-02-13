@@ -81,7 +81,9 @@ class {{ model }}Repository implements {{ model }}RepositoryInterface
         **/
         public function updateItem($itemId, array $newDetails)
         {
-             return   $this->modelName::whereId($itemId)->update($newDetails);
+             $item = $this->modelName::find($itemId);
+             $item->update($newDetails);
+             return  $item;
         }
 
 

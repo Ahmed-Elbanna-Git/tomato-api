@@ -10,10 +10,12 @@ use {{ path }}\Http\Resources\Api\{{ model }}Resource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
-
+use TomatoPHP\TomatoApi\Services\RespondsWithHttpStatus;
 
 class {{ model }}ApiController extends Controller
 {
+    use RespondsWithHttpStatus;
+
     public {{ model }}RepositoryInterface  ${{ objectName }}Repository;
 
     public function __construct({{ model }}RepositoryInterface ${{ objectName }}Repository)
@@ -21,7 +23,7 @@ class {{ model }}ApiController extends Controller
         $this->{{ objectName }}Repository = ${{ objectName }}Repository;
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): mixed
     {
         $searchItems = $request->except([
             'page',
@@ -30,75 +32,51 @@ class {{ model }}ApiController extends Controller
         $limit = $request->limit ?? 10;
 
         $data = {{ model }}Resource::collection($this->{{ objectName }}Repository->getAllData( $limit,$searchItems,'created_at','desc')) ;
-        return response()->json([
-            'status' => 200,
-            'message' =>' get all items',
-            'data' => $data
-        ]);
+
+        return $this->success(__('Get all items'),$data);
+
     }
 
-    public function store(Store{{ model }} $request) : JsonResponse
+    public function store(Store{{ model }} $request) : mixed
     {
         ${{ objectName }}Details = $request->all();
         $data = $this->{{ objectName }}Repository->createItem(${{ objectName }}Details);
-        return response()->json([
-            'status' => 200,
-            'message' =>'Created Successfully .'
-        ]);
+        return $this->success(__('Created Successfully'),$data);
+
      }
 
-    public function show(Request $request): JsonResponse
+    public function show(Request $request): mixed
     {
         ${{ objectName }}Id = $request->get('id');
         $item = $this->{{ objectName }}Repository->getItemById(${{ objectName }}Id);
         if(!$item){
-            return response()->json([
-                'success' => false,
-                'status' => 401,
-                'message' =>'Not Found.'
-            ]);
+             return $this->failure(__('Not Found'),401);
         }else{
-            $item =  new {{ model }}Resource($item) ;
-
-            return response()->json([
-                'success' => true,
-                'status' => 200,
-                 'message' =>'Item Retrieved Successfully.',
-                'data' => $item
-            ]);
+            $item =  new {{ model }}Resource($item);
+            return $this->success(__('Item Retrieved Successfully'),$item);
         }
 
     }
 
-    public function update(Update{{ model }}  $request): JsonResponse
+    public function update(Update{{ model }}  $request): mixed
     {
         ${{ objectName }}Id = $request->get('id');
 
         ${{ objectName }}Details = $request->all();
         $data =  $this->{{ objectName }}Repository->updateItem(${{ objectName }}Id, ${{ objectName }}Details);
-        return response()->json([
-            'status' => 200,
-            'message' =>'Updated Successfully .'
-        ]);
+        $item =  new {{ model }}Resource($data);
+        return $this->success(__('Updated Successfully'),$item);
     }
 
-    public function delete(Request $request): JsonResponse
+    public function delete(Request $request): mixed
     {
         ${{ objectName }}Id = $request->get('id');
         ${{ objectName }}Item =  $this->{{ objectName }}Repository->deleteItem(${{ objectName }}Id);
 
         if(!${{ objectName }}Item){
-            return response()->json([
-                'success' => false,
-                'status' => 401,
-                'message' =>'Not Found.'
-            ]);
-
+           return $this->failure(__('Not Found'),401);
         }else{
-            return response()->json([
-                'status' => 200,
-                'message' =>'Deleted Successfully .'
-                ]);
+            return $this->success(__('Deleted Successfully'));
         }
     }
 }
